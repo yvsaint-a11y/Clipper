@@ -1,0 +1,6 @@
+{
+  "name": "Clipper",
+  "description": "AI-powered cinematic video editor with structured, editable data templates, multi-track timeline, and cloud rendering pipeline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

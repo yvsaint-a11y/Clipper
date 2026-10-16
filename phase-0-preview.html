@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modify — Video Editor &amp; Template Studio | Phase 0 Architecture Portal</title>
+  <style>
+    /* Reset & Base Variables */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    :root {
+      --bg-main: #020617; /* slate-950 */
+      --bg-header: rgba(15, 23, 42, 0.75); /* slate-900 75% */
+      --card-bg: rgba(15, 23, 42, 0.6);
+      --card-solid: #0f172a;
+      --card-hover: #1e293b;
+      --border-subtle: #1e293b; /* slate-800 */
+      --border-card: #334155; /* slate-700 */
+      --text-white: #ffffff;
+      --text-main: #f8fafc; /* slate-50 */
+      --text-muted: #94a3b8; /* slate-400 */
+      --text-dim: #64748b; /* slate-500 */
+      --indigo-500: #6366f1;
+      --indigo-600: #4f46e5;
+      --indigo-400: #818cf8;
+      --indigo-300: #a5b4fc;
+      --emerald-400: #34d399;
+      --emerald-500: #10b981;
+      --amber-400: #fbbf24;
+      --amber-300: #fcd34d;
+      --rose-400: #fb7185;
+      --violet-400: #a78bfa;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* Layout Utility */
+    .max-w-7xl {
+      max-width: 80rem;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    @media (min-width: 640px) {
+      .max-w-7xl { padding-left: 1.5rem; padding-right: 1.5rem; }
+    }
+    @media (min-width: 1024px) {
+      .max-w-7xl { padding-left: 2rem; padding-right: 2rem; }
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--border-subtle);
+      background-color: var(--bg-header);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-content {
+      height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.25);
+    }
+    .brand-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .pill-phase {
+      padding: 0.125rem 0.5rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--emerald-400);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .header-meta {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    @media (min-width: 640px) {
+      .header-meta { display: flex; }
+    }
+    .meta-version {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .meta-code {
+      font-family: var(--font-mono);
+      color: #e2e8f0;
+    }
+    .divider-v {
+      width: 1px;
+      height: 1rem;
+      background-color: var(--border-subtle);
+    }
+    .pill-review {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 0.375rem;
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--amber-300);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    /* Hero Banner */
+    .hero-container {
+      padding-top: 2rem;
+    }
+    .hero-banner {
+      padding: 1.5rem;
+      border-radius: 1rem;
+      background: linear-gradient(90deg, #0f172a 0%, rgba(30, 27, 75, 0.3) 50%, #0f172a 100%);
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .hero-flex {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .hero-flex {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+    .hero-left {
+      max-width: 48rem;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--indigo-400);
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+    .hero-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .hero-desc {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .stat-pill {
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+      text-align: center;
+      min-width: 6.25rem;
+    }
+    .stat-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.125rem;
+    }
+
+    /* Tabs Navigation Bar */
+    .tabs-bar-container {
+      margin-top: 2rem;
+    }
+    .tabs-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      overflow-x: auto;
+      padding-bottom: 1px;
+      scrollbar-width: none;
+    }
+    .tabs-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      color: var(--text-muted);
+    }
+    .tab-btn:hover {
+      color: #e2e8f0;
+      border-bottom-color: var(--border-card);
+    }
+    .tab-btn.active {
+      border-bottom-color: var(--indigo-500);
+      color: #ffffff;
+      background-color: rgba(99, 102, 241, 0.05);
+    }
+    .tab-btn svg {
+      width: 1rem;
+      height: 1rem;
+      color: var(--text-dim);
+      transition: color 0.15s ease;
+    }
+    .tab-btn.active svg {
+      color: var(--indigo-400);
+    }
+
+    /* Main Content Area */
+    main {
+      padding-top: 2rem;
+      padding-bottom: 3rem;
+    }
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .section-header {
+      margin-bottom: 1.5rem;
+    }
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .section-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Grid Layouts */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 768px) {
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    @media (min-width: 640px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Cards */
+    .card {
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      transition: border-color 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card:hover {
+      border-color: var(--border-card);
+    }
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    .category-tag {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--indigo-400);
+    }
+    .alt-tag {
+      color: var(--text-dim);
+      font-size: 0.6875rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+    .card-footer-beginner {
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(30, 41, 59, 0.8);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.375rem;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: rgba(252, 211, 77, 0.9);
+    }
+    .card-footer-beginner svg {
+      width: 0.875rem;
+      height: 0.875rem;
+      color: var(--emerald-400);
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    /* Step Cards (Template tab) */
+    .step-card {
+      padding: 1rem;
+      border-radius: 0.75rem;
+      background: var(--card-solid);
+      border: 1px solid var(--border-subtle);
+      position: relative;
+    }
+    .step-number {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--indigo-400);
+    }
+    .step-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #fff;
+      margin: 0.25rem 0;
+    }
+    .step-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* JSON Schema Viewer */
+    .schema-viewer {
+      border-radius: 0.75rem;
+      background: var(--card-solid);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      margin-top: 1.5rem;
+    }
+    .schema-header {
+      padding: 0.75rem 1rem;
+      background: rgba(30, 41, 59, 0.6);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .schema-filename {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #e2e8f0;
+    }
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 0.25rem;
+      background: #1e293b;
+      color: #cbd5e1;
+      font-size: 0.75rem;
+      border: 1px solid #334155;
+      transition: background 0.15s ease;
+    }
+    .copy-btn:hover {
+      background: #334155;
+      color: #fff;
+    }
+    .code-pre {
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: rgba(165, 180, 252, 0.9);
+      overflow-x: auto;
+      max-height: 420px;
+      line-height: 1.6;
+      background: #090e1a;
+    }
+
+    /* System Flow Cards */
+    .flow-card {
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-subtle);
+    }
+    .flow-card.browser { border-color: rgba(99, 102, 241, 0.3); }
+    .flow-card.api { border-color: rgba(167, 139, 250, 0.3); }
+    .flow-card.workers { border-color: rgba(16, 185, 129, 0.3); }
+
+    .flow-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .flow-badge.browser { color: var(--indigo-400); }
+    .flow-badge.api { color: var(--violet-400); }
+    .flow-badge.workers { color: var(--emerald-400); }
+
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .check-icon {
+      width: 0.875rem;
+      height: 0.875rem;
+      color: var(--emerald-400);
+      margin-top: 0.125rem;
+      flex-shrink: 0;
+    }
+
+    /* Roadmap List */
+    .roadmap-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+    .roadmap-card {
+      padding: 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: all 0.15s ease;
+    }
+    @media (min-width: 768px) {
+      .roadmap-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+    .roadmap-card.active {
+      background: rgba(30, 27, 75, 0.25);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 10px 15px -3px rgba(30, 27, 75, 0.25);
+    }
+    .phase-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .phase-badge {
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      background: #1e293b;
+      color: var(--text-muted);
+    }
+    .roadmap-card.active .phase-badge {
+      background: var(--indigo-600);
+      color: #ffffff;
+    }
+    .phase-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .phase-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    .current-step-pill {
+      padding: 0.125rem 0.5rem;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--indigo-300);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .phase-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.125rem;
+    }
+    .deliverables-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    @media (min-width: 768px) {
+      .deliverables-group { justify-content: flex-end; }
+    }
+    .deliverable-tag {
+      padding: 0.25rem 0.625rem;
+      font-size: 0.6875rem;
+      border-radius: 0.375rem;
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+
+    /* Unit Economics & Costs */
+    .controls-panel {
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      background: var(--card-solid);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .panel-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+    }
+    .slider-val {
+      font-weight: 700;
+      color: var(--indigo-400);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--indigo-500);
+      background: #1e293b;
+      cursor: pointer;
+    }
+    .cost-table-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.375rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.75rem;
+    }
+    .cost-table-row span:first-child { color: var(--text-muted); }
+    .cost-table-row span:last-child { font-family: var(--font-mono); color: #fff; }
+
+    /* Revenue & Margins Card */
+    .revenue-card {
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.4) 0%, #0f172a 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .big-num-group {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .stat-metric {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-metric.green {
+      color: var(--emerald-400);
+    }
+    .callout-box {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      font-size: 0.6875rem;
+      color: #6ee7b7;
+      line-height: 1.4;
+    }
+
+    /* Scope Boundaries */
+    .scope-box {
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      background: var(--card-solid);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .scope-box.must { border: 1px solid rgba(16, 185, 129, 0.3); }
+    .scope-box.excluded { border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    .scope-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .scope-badge.must { color: var(--emerald-400); }
+    .scope-badge.excluded { color: var(--rose-400); }
+
+    .cross-icon {
+      color: var(--rose-400);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      background-color: var(--bg-main);
+      padding: 1.5rem 0;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="max-w-7xl header-content">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <!-- Film Icon SVG -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title-wrap">
+            <h1 class="brand-title">Video Editor &amp; Template Studio</h1>
+            <span class="pill-phase">Phase 0 Active</span>
+          </div>
+          <p class="brand-subtitle">Technical Architecture &amp; Product Specification</p>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <span class="meta-version">Blueprint Version: <span class="meta-code">v1.0.0</span></span>
+        <div class="divider-v"></div>
+        <span class="pill-review">
+          <!-- Alert Circle SVG -->
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+          </svg>
+          Ready for Review
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Brief Container -->
+  <div class="max-w-7xl hero-container">
+    <div class="hero-banner">
+      <div class="hero-flex">
+        <div class="hero-left">
+          <div class="hero-badge">
+            <!-- Sparkles SVG -->
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+            </svg>
+            Founder Architecture Brief
+          </div>
+          <h2 class="hero-title">Welcome to Phase 0: The Engineering Source of Truth</h2>
+          <p class="hero-desc">
+            Before writing production code, every technical decision, database entity, and template schema is strictly defined. This prevents costly architectural rewrites and ensures the app can scale to thousands of users with 90%+ gross margins.
+          </p>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-pill">
+            <div class="stat-val" style="color: var(--emerald-400);">22</div>
+            <div class="stat-label">Phases Planned</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-val" style="color: var(--indigo-400);">$0</div>
+            <div class="stat-label">Egress (R2)</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-val" style="color: var(--amber-400);">100%</div>
+            <div class="stat-label">Data Templates</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Horizontal Tabs Navigation -->
+  <div class="max-w-7xl tabs-bar-container">
+    <nav class="tabs-nav" id="tabsNav">
+      <button class="tab-btn active" data-tab="stack">
+        <!-- Cpu Icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>
+        </svg>
+        Technology Stack
+      </button>
+
+      <button class="tab-btn" data-tab="template">
+        <!-- Layers Icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+          <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
+        </svg>
+        Template Engine (Core USP)
+      </button>
+
+      <button class="tab-btn" data-tab="flow">
+        <!-- Workflow Icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>
+        </svg>
+        Data Flow &amp; Workers
+      </button>
+
+      <button class="tab-btn" data-tab="roadmap">
+        <!-- Clock Icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        22-Phase Roadmap
+      </button>
+
+      <button class="tab-btn" data-tab="costs">
+        <!-- DollarSign Icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        Unit Economics &amp; Margin
+      </button>
+
+      <button class="tab-btn" data-tab="scope">
+        <!-- Shield Icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+        </svg>
+        V1 Scope Boundaries
+      </button>
+    </nav>
+  </div>
+
+  <!-- Tab Contents Area -->
+  <main class="max-w-7xl">
+
+    <!-- TAB 1: TECH STACK -->
+    <div id="tab-stack" class="tab-content active">
+      <div class="section-header">
+        <h3 class="section-title">Recommended Production Stack</h3>
+        <p class="section-subtitle">Every layer is selected for maximum reliability, low startup cost, and rapid development speed.</p>
+      </div>
+
+      <div class="grid-3" id="techStackGrid">
+        <!-- Cards generated by JS from TECH_STACK data -->
+      </div>
+    </div>
+
+    <!-- TAB 2: TEMPLATE ENGINE -->
+    <div id="tab-template" class="tab-content">
+      <div class="section-header">
+        <h3 class="section-title">The Structured Template Engine</h3>
+        <p class="section-subtitle">Templates are never saved as flattened MP4s. They are procedural data recipes containing media slots, layout rules, typography styles, and auto-crop behaviors.</p>
+      </div>
+
+      <div class="grid-4">
+        <div class="step-card">
+          <span class="step-number">01</span>
+          <h4 class="step-title">Template Recipe</h4>
+          <p class="step-desc">Defines abstract slots (PRIMARY_VIDEO, LOGO_SLOT, HOOK_TITLE) with layout, crop, and font constraints.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-number">02</span>
+          <h4 class="step-title">User Ingestion</h4>
+          <p class="step-desc">The user uploads a new raw video (e.g. Episode 42) and picks the "Viral Podcast Short" template.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-number">03</span>
+          <h4 class="step-title">Procedural Instantiation</h4>
+          <p class="step-desc">The engine clones the recipe, generating fresh UUIDs and injecting the new media IDs into the slots.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-number">04</span>
+          <h4 class="step-title">Independent Project</h4>
+          <p class="step-desc">A completely new, editable project timeline is created. The original template remains 100% untouched.</p>
+        </div>
+      </div>
+
+      <div class="schema-viewer">
+        <div class="schema-header">
+          <div class="schema-filename">
+            <!-- Code2 SVG -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--indigo-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>
+            </svg>
+            viral_podcast_short.template.json
+          </div>
+          <button class="copy-btn" id="copySchemaBtn" onclick="copyTemplateSchema()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="copyIcon">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+            <span id="copyBtnText">Copy JSON</span>
+          </button>
+        </div>
+        <pre class="code-pre" id="schemaCodeBlock"></pre>
+      </div>
+    </div>
+
+    <!-- TAB 3: DATA FLOW & WORKERS -->
+    <div id="tab-flow" class="tab-content">
+      <div class="section-header">
+        <h3 class="section-title">System Architecture &amp; Compute Boundaries</h3>
+        <p class="section-subtitle">Heavy operations (transcoding, audio waveform calculation, and final 1080p rendering) are offloaded to background workers. The browser stays fluid at 60fps.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="flow-card browser">
+          <div class="flow-badge browser">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg>
+            Browser (Client-Side)
+          </div>
+          <ul class="checklist">
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Direct multipart upload to Cloudflare R2 via presigned URLs</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Instant timeline scrubbing using 720p H.264 proxy files</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>HTML5 Canvas 2D overlay compositing (text, stickers, crop box)</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Local undo/redo stack in Zustand store</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="flow-card api">
+          <div class="flow-badge api">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+            API Server (Node.js/Express)
+          </div>
+          <ul class="checklist">
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Tenant-guarded project &amp; timeline CRUD</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Template procedural slot resolution &amp; deep cloning</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>R2 presigned upload &amp; download URL issuance</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Quota limits enforcement (storage &amp; render minutes)</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="flow-card workers">
+          <div class="flow-badge workers">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+            Compute Fleet (BullMQ Workers)
+          </div>
+          <ul class="checklist">
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>FFmpeg 720p proxy generation with faststart moov atom</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Audio waveform JSON extraction via audiowaveform</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Remotion headless Chrome frame-accurate 1080p MP4 export</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Job progress reporting (0% to 100%) and automatic retries</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: ROADMAP -->
+    <div id="tab-roadmap" class="tab-content">
+      <div class="section-header">
+        <h3 class="section-title">The 22-Phase Production Roadmap</h3>
+        <p class="section-subtitle">Each phase is completed and verified sequentially. We are currently concluding Phase 0.</p>
+      </div>
+
+      <div class="roadmap-list" id="roadmapContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TAB 5: COSTS & UNIT ECONOMICS -->
+    <div id="tab-costs" class="tab-content">
+      <div class="section-header">
+        <h3 class="section-title">Startup Unit Economics &amp; Cost Simulator</h3>
+        <p class="section-subtitle">Test how Cloudflare R2's zero-egress architecture keeps gross margins above 90% as user volume scales.</p>
+      </div>
+
+      <div class="grid-3">
+        <!-- Controls -->
+        <div class="controls-panel">
+          <h4 class="panel-title">Simulation Parameters</h4>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Active Users:</span>
+              <span class="slider-val" id="userCountVal">250 users</span>
+            </div>
+            <input type="range" id="userCountSlider" min="50" max="1000" step="50" value="250" oninput="updateCostSimulation()">
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span>Avg Render Mins / User:</span>
+              <span class="slider-val" id="avgRenderMinsVal">30 minutes</span>
+            </div>
+            <input type="range" id="avgRenderMinsSlider" min="10" max="90" step="5" value="30" oninput="updateCostSimulation()">
+          </div>
+
+          <div style="padding-top: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.25rem;">
+            <p>• Estimated Paid Pro Users (12%): <strong id="proSubsVal" style="color: #fff;">30</strong></p>
+            <p>• Total Storage Required: <strong id="storageGbVal" style="color: #fff;">375 GB</strong></p>
+            <p>• Total Render Hours: <strong id="renderHoursVal" style="color: #fff;">125.0 hrs</strong></p>
+          </div>
+        </div>
+
+        <!-- Cost Breakdown -->
+        <div class="controls-panel">
+          <h4 class="panel-title">Monthly Infrastructure Cost</h4>
+
+          <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <div class="cost-table-row">
+              <span>Cloudflare R2 Storage (10GB Free):</span>
+              <span id="r2StorageCostVal">$5.48</span>
+            </div>
+            <div class="cost-table-row">
+              <span>R2 Egress Bandwidth (Zero Egress):</span>
+              <span style="color: var(--emerald-400); font-weight: 700;">$0.00</span>
+            </div>
+            <div class="cost-table-row">
+              <span>Worker Render Compute ($0.08/hr):</span>
+              <span id="workerComputeCostVal">$10.00</span>
+            </div>
+            <div class="cost-table-row">
+              <span>API Server &amp; Container Hosting:</span>
+              <span>$15.00</span>
+            </div>
+            <div class="cost-table-row">
+              <span>PostgreSQL (Free tier):</span>
+              <span>$0.00</span>
+            </div>
+            <div class="cost-table-row">
+              <span>Redis BullMQ (Free tier):</span>
+              <span>$0.00</span>
+            </div>
+          </div>
+
+          <div style="padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.875rem;">
+            <span style="color: var(--text-main);">Total Monthly Cost:</span>
+            <span id="totalCostVal" style="color: var(--amber-400); font-family: var(--font-mono);">$30.48</span>
+          </div>
+        </div>
+
+        <!-- Margins -->
+        <div class="revenue-card">
+          <div>
+            <h4 class="panel-title">Monthly SaaS Margin</h4>
+            <div class="big-num-group">
+              <div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Gross Monthly Revenue</span>
+                <div class="stat-metric" id="grossRevenueVal">$870</div>
+                <span style="font-size: 0.6875rem; color: var(--text-muted);">(<span id="proCountSubtitle">30</span> Pro @ $29/mo)</span>
+              </div>
+
+              <div style="padding-top: 0.75rem; border-top: 1px solid var(--border-subtle);">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Net Estimated Profit</span>
+                <div class="stat-metric green" id="grossProfitVal">$839.52</div>
+                <span style="font-size: 0.6875rem; color: var(--emerald-400); font-weight: 500;" id="marginPercentVal">
+                  ~96% Gross Margin
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout-box">
+            Zero egress fees with Cloudflare R2 ensure you never face unexpected spikes when users preview videos.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: SCOPE BOUNDARIES -->
+    <div id="tab-scope" class="tab-content">
+      <div class="section-header">
+        <h3 class="section-title">V1 MVP Scope Discipline</h3>
+        <p class="section-subtitle">To launch a high-quality product, we prioritize the core template engine and exclude unnecessary distractions.</p>
+      </div>
+
+      <div class="grid-2">
+        <!-- Must Have -->
+        <div class="scope-box must">
+          <div class="scope-badge must">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            Must Have in V1 (MVP Core)
+          </div>
+          <ul class="checklist">
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Structured Template Engine:</strong> Save projects as data recipes; apply new media to slots.</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Multi-Track Timeline:</strong> Trimming, splitting, snapping, and track layering.</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Visual Transforms:</strong> Position, scale, rotation, opacity, and 9:16 / 16:9 canvas aspect ratios.</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Text &amp; Subtitle Styler:</strong> Animated text presets and word pop captions.</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Cloud Rendering:</strong> Remotion/FFmpeg background worker rendering 1080p MP4.</span>
+            </li>
+            <li class="checklist-item">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Stripe Billing:</strong> Free vs. Pro tier with monthly render minute tracking.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Excluded -->
+        <div class="scope-box excluded">
+          <div class="scope-badge excluded">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+            Intentionally Excluded From V1
+          </div>
+          <ul class="checklist">
+            <li class="checklist-item">
+              <span class="cross-icon">✕</span>
+              <span><strong>AI Video Generation / Generative Avatars:</strong> High external API costs, distracts from core editor.</span>
+            </li>
+            <li class="checklist-item">
+              <span class="cross-icon">✕</span>
+              <span><strong>Real-time Multiplayer Collaboration:</strong> Unnecessary synchronization complexity for V1.</span>
+            </li>
+            <li class="checklist-item">
+              <span class="cross-icon">✕</span>
+              <span><strong>4K Video Rendering:</strong> High server CPU consumption; 1080p is standard for shorts.</span>
+            </li>
+            <li class="checklist-item">
+              <span class="cross-icon">✕</span>
+              <span><strong>Mobile Native Apps:</strong> Desktop/laptop browser is the primary environment for serious editing.</span>
+            </li>
+            <li class="checklist-item">
+              <span class="cross-icon">✕</span>
+              <span><strong>Advanced Color Grading / LUT Shaders:</strong> Complex shader pipelines not needed for podcast shorts.</span>
+            </li>
+            <li class="checklist-item">
+              <span class="cross-icon">✕</span>
+              <span><strong>Large Stock Media Marketplace:</strong> Avoid expensive third-party licensing APIs.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    Phase 0 Architectural Blueprint complete. Ready to proceed to Phase 1 (Foundation &amp; Dev Setup).
+  </footer>
+
+  <!-- Standalone JavaScript -->
+  <script>
+    // 1. DATA CONSTANTS
+    const TECH_STACK = [
+      {
+        category: "Frontend Framework",
+        selected: "React 19 + Vite + TypeScript",
+        alternatives: ["Next.js (SSR)", "Remix", "Svelte"],
+        reason: "A browser video editor requires microsecond canvas redraws and zero-latency timeline scrubbing. Next.js Server Components add heavy friction for stateful Web Audio and Canvas contexts.",
+        whyForBeginner: "React SPA is straightforward to reason about: everything runs in the browser, no confusing server-action or hydration boundary bugs."
+      },
+      {
+        category: "UI & Styling",
+        selected: "Tailwind CSS + Radix UI Primitives",
+        alternatives: ["MUI", "Chakra UI", "CSS Modules"],
+        reason: "Zero runtime CSS overhead. Essential to maintain a consistent 60fps frame rate during timeline scrubbing and live scaling.",
+        whyForBeginner: "Utility classes make adjusting padding, colors, and layout fast without writing hundreds of custom CSS files."
+      },
+      {
+        category: "Timeline State Engine",
+        selected: "Zustand with Immer Middleware",
+        alternatives: ["Redux Toolkit", "Jotai", "React Context"],
+        reason: "Allows micro-subscriptions. Moving a clip on track 3 re-renders only track 3, preventing lag across the canvas, inspector, and audio mixer.",
+        whyForBeginner: "Minimal boilerplate compared to Redux, with built-in immutable updates via Immer."
+      },
+      {
+        category: "Canvas Compositor",
+        selected: "HTML5 Canvas 2D + Web Audio API",
+        alternatives: ["Pixi.js", "Three.js", "Pure DOM <video>"],
+        reason: "Lightweight and fully controllable. Allows custom crop boxes, text layers, and transition blending without heavy 3D engine overhead.",
+        whyForBeginner: "Standard browser API supported across all modern browsers without complex shader debugging."
+      },
+      {
+        category: "Backend API Server",
+        selected: "Node.js (Express) with TypeScript",
+        alternatives: ["Fastify", "NestJS", "Go / Python"],
+        reason: "Runs natively in our AI Studio environment on Port 3000, unifies TypeScript types across client and server, and handles multipart upload negotiation.",
+        whyForBeginner: "Express is the most documented and battle-tested Node framework in existence with abundant tutorials and guides."
+      },
+      {
+        category: "Database & ORM",
+        selected: "PostgreSQL + Drizzle ORM",
+        alternatives: ["Prisma", "TypeORM", "MongoDB"],
+        reason: "PostgreSQL provides relational integrity for multi-tenant accounts, projects, and template slot hierarchies. Drizzle generates zero runtime bloat and pure type-safety.",
+        whyForBeginner: "Drizzle writes clean, readable SQL queries without mysterious hidden Prisma engine binaries."
+      },
+      {
+        category: "Object Storage",
+        selected: "Cloudflare R2 (S3 API)",
+        alternatives: ["AWS S3", "Google Cloud Storage", "Supabase Storage"],
+        reason: "Zero egress fees. AWS S3 charges $0.09/GB for downloads. Video editing involves transferring gigabytes of footage; S3 egress would destroy SaaS profit margins.",
+        whyForBeginner: "Cloudflare R2 behaves identically to S3 using the AWS SDK, but your monthly bill won't surprise you with bandwidth charges."
+      },
+      {
+        category: "Video Transcoding",
+        selected: "FFmpeg (Ingestion & Waveform Pipeline)",
+        alternatives: ["GStreamer", "Cloud Transcoder APIs"],
+        reason: "Industry standard for probing media headers, generating 720p H.264 fast-start proxies, and extracting audio waveforms.",
+        whyForBeginner: "Reliable and runs anywhere via containerized worker scripts."
+      },
+      {
+        category: "Final Video Export",
+        selected: "Remotion + Headless Chromium Worker",
+        alternatives: ["Pure FFmpeg Filtergraphs", "Shotstack API"],
+        reason: "Remotion renders React components directly to MP4 frame-by-frame. What the user previews in React is 100% pixel-for-pixel identical to the exported video.",
+        whyForBeginner: "Instead of writing complex mathematical FFmpeg filter string scripts, you write clean React code for titles, transitions, and overlays."
+      },
+      {
+        category: "Job Queue & Task Broker",
+        selected: "Redis + BullMQ",
+        alternatives: ["RabbitMQ", "AWS SQS", "Temporal"],
+        reason: "Decouples long video renders from HTTP requests. Provides job retries, progress percentages (0-100%), and worker pool scaling.",
+        whyForBeginner: "BullMQ runs directly in TypeScript with clear lifecycle events: queued, progress, completed, failed."
+      },
+      {
+        category: "Authentication",
+        selected: "Firebase Auth / Supabase Auth",
+        alternatives: ["Clerk", "Auth0", "Custom JWT"],
+        reason: "Built-in tenant isolation, secure JWT tokens, Google social login, and generous free tier (50,000 monthly active users).",
+        whyForBeginner: "Handles password hashing, token refreshes, and reset emails without custom cryptography code."
+      },
+      {
+        category: "Billing & Subscriptions",
+        selected: "Stripe Billing & Customer Portal",
+        alternatives: ["Paddle", "Lemon Squeezy"],
+        reason: "Industry benchmark for recurring SaaS subscriptions, automated invoice generation, and secure webhook signature verification.",
+        whyForBeginner: "Pre-built Stripe Checkout and Customer Portal mean you don't have to build custom credit card forms."
+      }
+    ];
+
+    const ROADMAP_PHASES = [
+      { phaseNumber: 0, title: "Architecture & Blueprint Analysis", description: "Define technical specifications, data models, template engine rules, and cost models. Zero production code written until plan is approved.", deliverables: ["22-Point Technical Blueprint", "Data Models (JSON & SQL)", "Risk Analysis & Mitigation Plan"], status: "active" },
+      { phaseNumber: 1, title: "Development Setup & Shared Contracts", description: "Configure Express + Vite dev server on Port 3000, folder structure, and shared TypeScript interfaces.", deliverables: ["server.ts entry point", "timeline.ts, template.ts, media.ts types", "Shared constants"], status: "pending" },
+      { phaseNumber: 2, title: "Application Shell & Layout System", description: "Responsive editor layout: Canvas stage viewport, timeline dock, clip inspector, and media bin.", deliverables: ["Editor Shell Layout", "Dock Resizing", "Theme & Icon integration"], status: "pending" },
+      { phaseNumber: 3, title: "Authentication & Tenant Guard", description: "User signup, login, session persistence, and tenant isolation middleware.", deliverables: ["Auth context", "Protected routes", "Tenant scoping middleware"], status: "pending" },
+      { phaseNumber: 4, title: "Database Schema & Persistence", description: "PostgreSQL setup with Drizzle ORM for projects, timelines, tracks, clips, and templates.", deliverables: ["Drizzle schema", "Migration files", "Repository queries"], status: "pending" },
+      { phaseNumber: 5, title: "Project Management Dashboard", description: "Dashboard to create, duplicate, rename, and organize projects with aspect ratio selection.", deliverables: ["Project Grid View", "Create Project Modal (9:16, 16:9, 1:1)", "Delete & Duplicate"], status: "pending" },
+      { phaseNumber: 6, title: "Direct Media Upload Pipeline", description: "Direct-to-storage presigned upload with client-side drag-and-drop and progress tracking.", deliverables: ["R2 Presigned URL API", "Media Bin Component", "MIME & Size Validator"], status: "pending" },
+      { phaseNumber: 7, title: "Editor Canvas & Playhead Engine", description: "HTML5 Canvas viewport with real-time transform gizmo (drag, scale, rotate, crop) and 60fps clock.", deliverables: ["Canvas Stage", "Transform Handles", "Virtual Playhead Engine"], status: "pending" },
+      { phaseNumber: 8, title: "Multi-Track Interactive Timeline", description: "Track rows for video, audio, text, and captions with trimming, splitting, and snapping.", deliverables: ["Timeline Ruler & Scrubbing", "Clip Trim Handles", "Clip Split (Razor Tool)"], status: "pending" },
+      { phaseNumber: 9, title: "Template Engine: Procedural Core", description: "Abstractor engine that converts a concrete project into a reusable template recipe with abstract slots.", deliverables: ["Project-to-Template Generator", "Slot Rule Evaluator", "Template JSON Serializer"], status: "pending" },
+      { phaseNumber: 10, title: "Built-in System Templates", description: "3 production-quality templates: 'Viral Podcast Short', 'Gaming Highlight', and 'Minimal Vlog'.", deliverables: ["Podcast 9:16 Preset", "Gaming 9:16 Preset", "Vlog 16:9 Preset"], status: "pending" },
+      { phaseNumber: 11, title: "User Custom Template Studio", description: "Allow users to turn any project into a private template with named placeholder slots.", deliverables: ["Save as Template UI", "Slot Tagging Dialog", "User Template Browser"], status: "pending" },
+      { phaseNumber: 12, title: "Template Instantiation & Application", description: "Apply Template workflow: Ingest new video into slots and generate an independent, editable project.", deliverables: ["Slot Ingestion Modal", "Deep Clone Engine", "Independence Verifier"], status: "pending" },
+      { phaseNumber: 13, title: "FFmpeg Ingestion & Waveforms", description: "Server/worker pipeline to generate fast 720p proxies and extract audio waveforms.", deliverables: ["FFmpeg Transcode Worker", "Waveform JSON Generator", "Thumbnail Extractor"], status: "pending" },
+      { phaseNumber: 14, title: "Remotion Cloud Rendering Engine", description: "Remotion composition that mirrors the React timeline for frame-accurate 1080p MP4 rendering.", deliverables: ["Remotion Root Composition", "Audio Track Mixer", "Export Pipeline"], status: "pending" },
+      { phaseNumber: 15, title: "Background Workers & BullMQ", description: "Redis job queue with concurrency limits, retries, and live progress percentage reporting.", deliverables: ["Render Queue Manager", "Progress SSE Endpoint", "Retry & Error Recovery"], status: "pending" },
+      { phaseNumber: 16, title: "Export Manager & Download Delivery", description: "Resolution selection (720p/1080p), export queue status dialog, and signed download delivery.", deliverables: ["Export Dialog", "Live Render Progress Card", "Signed Download Links"], status: "pending" },
+      { phaseNumber: 17, title: "Stripe Billing & Quota Limits", description: "Free vs. Pro subscriptions with automated render-minute metering and storage enforcement.", deliverables: ["Stripe Checkout & Portal", "Webhook Handler", "Quota Guard Middleware"], status: "pending" },
+      { phaseNumber: 18, title: "Security Hardening & Audits", description: "Cross-tenant access audits, presigned URL TTL checks, and upload sanitization.", deliverables: ["Security Audit Tests", "MIME Magic Byte Verification", "Rate Limiter"], status: "pending" },
+      { phaseNumber: 19, title: "Comprehensive Test Suite", description: "Unit tests for timeline math, integration tests for API endpoints, and E2E editor test.", deliverables: ["Vitest Suite", "API Route Tests", "Playwright E2E Flow"], status: "pending" },
+      { phaseNumber: 20, title: "Performance Optimization", description: "Timeline track virtualization for 100+ clips and WebGL caching for smooth scrubbing.", deliverables: ["Virtualized Track List", "AudioContext Pool", "Memory Leak Prevention"], status: "pending" },
+      { phaseNumber: 21, title: "Production Deployment Setup", description: "Dockerfiles for worker containers, Cloudflare R2 CORS rules, and CI/CD pipelines.", deliverables: ["Production Dockerfile", "R2 CORS Config", "Deployment Checklist"], status: "pending" },
+      { phaseNumber: 22, title: "Final QA & Product Handover", description: "End-to-end verification of the user journey from signup to template creation to export.", deliverables: ["QA Verification Report", "Founder Maintenance Guide", "Release Candidate"], status: "pending" }
+    ];
+
+    const TEMPLATE_SPEC_JSON = `{
+  "$schema": "https://veedflow.app/schemas/template-v1.json",
+  "templateId": "tmpl_viral_podcast_short",
+  "title": "Viral Podcast Short (Subtitles + Face Zoom)",
+  "category": "podcast",
+  "aspectRatio": "9:16",
+  "canvas": { "width": 1080, "height": 1920 },
+  "durationStrategy": "match_primary_video",
+  
+  "slots": [
+    {
+      "slotKey": "PRIMARY_VIDEO_SLOT",
+      "label": "Speaker Video Clip",
+      "slotType": "video",
+      "required": true,
+      "description": "Upload horizontal or vertical footage of the speaker",
+      "rules": {
+        "autoCrop": "center_9_16",
+        "scale": 1.2,
+        "position": { "x": 0, "y": 0 }
+      }
+    },
+    {
+      "slotKey": "LOGO_SLOT",
+      "label": "Corner Brand Logo",
+      "slotType": "image",
+      "required": false,
+      "rules": {
+        "position": { "x": 420, "y": -850 },
+        "scale": 0.4,
+        "opacity": 0.8
+      }
+    },
+    {
+      "slotKey": "EPISODE_TITLE_SLOT",
+      "label": "Top Headline / Hook",
+      "slotType": "text",
+      "required": true,
+      "defaultText": "HOW TO SCALE IN 2026",
+      "rules": {
+        "fontFamily": "Montserrat",
+        "fontSize": 56,
+        "fontWeight": 900,
+        "color": "#FFDD00",
+        "position": { "x": 0, "y": -700 }
+      }
+    },
+    {
+      "slotKey": "BGM_AUDIO_SLOT",
+      "label": "Background Music Bed",
+      "slotType": "audio",
+      "required": false,
+      "rules": {
+        "volume": 0.15,
+        "loopToMatchVideo": true,
+        "fadeOutMs": 2000
+      }
+    }
+  ],
+
+  "trackRecipes": [
+    {
+      "targetSlotKey": "PRIMARY_VIDEO_SLOT",
+      "trackType": "video",
+      "trackOrder": 0,
+      "applyRules": {
+        "duration": "$PRIMARY_VIDEO_DURATION",
+        "transitions": {
+          "in": { "type": "fade", "durationMs": 300 }
+        }
+      }
+    },
+    {
+      "trackType": "caption",
+      "trackOrder": 1,
+      "sourceAudioFromSlot": "PRIMARY_VIDEO_SLOT",
+      "style": {
+        "preset": "karaoke_pop",
+        "wordsPerLine": 3,
+        "fontFamily": "Inter",
+        "color": "#FFFFFF",
+        "highlightColor": "#00FF88",
+        "yPosition": 450
+      }
+    },
+    {
+      "targetSlotKey": "LOGO_SLOT",
+      "trackType": "overlay",
+      "trackOrder": 2,
+      "applyRules": {
+        "startMs": 0,
+        "endMs": "$PRIMARY_VIDEO_DURATION"
+      }
+    },
+    {
+      "targetSlotKey": "EPISODE_TITLE_SLOT",
+      "trackType": "text",
+      "trackOrder": 3,
+      "applyRules": {
+        "startMs": 0,
+        "endMs": 5000,
+        "transitionOut": { "type": "slide_up", "durationMs": 400 }
+      }
+    }
+  ]
+}`;
+
+    // 2. RENDER TECH STACK
+    const stackGrid = document.getElementById('techStackGrid');
+    TECH_STACK.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div>
+          <div class="card-top">
+            <span class="category-tag">${item.category}</span>
+            <span class="alt-tag">vs ${item.alternatives.join(', ')}</span>
+          </div>
+          <div class="card-title">${item.selected}</div>
+          <p class="card-desc">${item.reason}</p>
+        </div>
+        <div class="card-footer-beginner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>${item.whyForBeginner}</span>
+        </div>
+      `;
+      stackGrid.appendChild(card);
+    });
+
+    // 3. RENDER ROADMAP
+    const roadmapContainer = document.getElementById('roadmapContainer');
+    ROADMAP_PHASES.forEach(p => {
+      const card = document.createElement('div');
+      card.className = `roadmap-card ${p.status === 'active' ? 'active' : ''}`;
+      card.innerHTML = `
+        <div class="phase-left">
+          <div class="phase-badge">P${p.phaseNumber}</div>
+          <div>
+            <div class="phase-title-wrap">
+              <h4 class="phase-title">${p.title}</h4>
+              ${p.status === 'active' ? '<span class="current-step-pill">Current Step</span>' : ''}
+            </div>
+            <p class="phase-desc">${p.description}</p>
+          </div>
+        </div>
+        <div class="deliverables-group">
+          ${p.deliverables.map(d => `<span class="deliverable-tag">${d}</span>`).join('')}
+        </div>
+      `;
+      roadmapContainer.appendChild(card);
+    });
+
+    // 4. SET SCHEMA CODE
+    document.getElementById('schemaCodeBlock').textContent = TEMPLATE_SPEC_JSON;
+
+    // 5. COPY SCHEMA
+    function copyTemplateSchema() {
+      navigator.clipboard.writeText(TEMPLATE_SPEC_JSON);
+      const btnText = document.getElementById('copyBtnText');
+      const icon = document.getElementById('copyIcon');
+      btnText.textContent = 'Copied';
+      icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+      setTimeout(() => {
+        btnText.textContent = 'Copy JSON';
+        icon.innerHTML = '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>';
+      }, 2000);
+    }
+
+    // 6. TAB SWITCHING
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+      });
+    });
+
+    // 7. COST SIMULATOR DYNAMICS
+    function updateCostSimulation() {
+      const userCount = parseInt(document.getElementById('userCountSlider').value);
+      const avgRenderMins = parseInt(document.getElementById('avgRenderMinsSlider').value);
+
+      document.getElementById('userCountVal').textContent = `${userCount} users`;
+      document.getElementById('avgRenderMinsVal').textContent = `${avgRenderMins} minutes`;
+
+      const storageGB = Math.round(userCount * 1.5);
+      const r2StorageCost = Math.max(0, (storageGB - 10) * 0.015);
+      const totalRenderHours = (userCount * avgRenderMins) / 60;
+      const workerComputeCost = Math.round(totalRenderHours * 0.08 * 100) / 100;
+      const hostingCost = 15.00;
+      const databaseCost = 0.00;
+      const redisCost = 0.00;
+      const totalCost = (r2StorageCost + workerComputeCost + hostingCost + databaseCost + redisCost);
+
+      const proSubscribers = Math.round(userCount * 0.12);
+      const grossRevenue = proSubscribers * 29;
+      const grossProfit = Math.max(0, grossRevenue - totalCost);
+      const margin = grossRevenue > 0 ? Math.round((grossProfit / grossRevenue) * 100) : 0;
+
+      document.getElementById('proSubsVal').textContent = proSubscribers;
+      document.getElementById('proCountSubtitle').textContent = proSubscribers;
+      document.getElementById('storageGbVal').textContent = `${storageGB} GB`;
+      document.getElementById('renderHoursVal').textContent = `${totalRenderHours.toFixed(1)} hrs`;
+
+      document.getElementById('r2StorageCostVal').textContent = `$${r2StorageCost.toFixed(2)}`;
+      document.getElementById('workerComputeCostVal').textContent = `$${workerComputeCost.toFixed(2)}`;
+      document.getElementById('totalCostVal').textContent = `$${totalCost.toFixed(2)}`;
+
+      document.getElementById('grossRevenueVal').textContent = `$${grossRevenue}`;
+      document.getElementById('grossProfitVal').textContent = `$${grossProfit.toFixed(2)}`;
+      document.getElementById('marginPercentVal').textContent = `~${margin}% Gross Margin`;
+    }
+
+    // Initialize simulator
+    updateCostSimulation();
+  </script>
+</body>
+</html>
