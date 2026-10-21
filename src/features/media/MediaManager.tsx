@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../auth/AuthContext';
 import { useMediaProcessingStore } from './stores/useMediaProcessingStore';
+import { parsePresignUploadResponse } from './uploadContract';
 import { Surface, MotionButton, Badge, FeedbackBanner, EmptyState } from '../../components/ui';
 import { motionTokens } from '../../lib/designTokens';
 import {
@@ -275,7 +276,8 @@ export const MediaManager: React.FC = () => {
         throw new Error(errData.error || 'Failed to authorize upload.');
       }
 
-      const { assetId, uploadUrl, requiredHeaders } = await presignRes.json();
+      const data = await presignRes.json();
+      const { assetId, uploadUrl, requiredHeaders } = parsePresignUploadResponse(data);
 
       // Step 2: Upload directly to R2 via XMLHttpRequest with progress tracking
       setUploadStatus('Transferring to Cloudflare R2...');

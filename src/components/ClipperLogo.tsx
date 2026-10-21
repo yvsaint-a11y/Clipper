@@ -4,7 +4,7 @@ import { cn } from '@/src/lib/utils';
 export interface ClipperLogoProps {
   className?: string;
   variant?: 'full' | 'mark' | 'compact';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   showDescriptor?: boolean;
 }
 
@@ -18,20 +18,29 @@ export const ClipperLogo: React.FC<ClipperLogoProps> = ({
     sm: 'w-6 h-6',
     md: 'w-7 h-7 sm:w-8 sm:h-8',
     lg: 'w-10 h-10',
+    xl: 'w-14 h-14 sm:w-16 sm:h-16',
   };
 
   const textSizes = {
     sm: 'text-sm tracking-tight',
     md: 'text-base sm:text-lg tracking-tight',
     lg: 'text-xl sm:text-2xl tracking-tight',
+    xl: 'text-3xl sm:text-4xl tracking-wider',
+  };
+
+  const svgSizes = {
+    sm: 'w-4 h-4 sm:w-5 sm:h-5',
+    md: 'w-4 h-4 sm:w-5 sm:h-5',
+    lg: 'w-6 h-6 sm:w-7 sm:h-7',
+    xl: 'w-8 h-8 sm:w-9 sm:h-9',
   };
 
   return (
-    <div className={cn('inline-flex items-center gap-2.5 select-none', className)}>
+    <div className={cn('inline-flex items-center gap-2.5 sm:gap-3 select-none', className)}>
       {/* Precision Metallic "C" Aperture Mark */}
       <div
         className={cn(
-          'relative flex items-center justify-center shrink-0 rounded-lg bg-[#141516] border border-[#3A3C3F] shadow-[0_2px_8px_rgba(0,0,0,0.6)] group-hover:border-[#686B70] transition-colors',
+          'relative flex items-center justify-center shrink-0 rounded-lg sm:rounded-xl bg-[#141516] border border-[#3A3C3F] shadow-[0_2px_8px_rgba(0,0,0,0.6)] group-hover:border-[#686B70] transition-colors',
           markSizes[size]
         )}
         aria-hidden="true"
@@ -40,7 +49,7 @@ export const ClipperLogo: React.FC<ClipperLogoProps> = ({
           viewBox="0 0 32 32"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-4 h-4 sm:w-5 sm:h-5"
+          className={svgSizes[size]}
         >
           <defs>
             <linearGradient id="clipper-metallic-sheen" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">

@@ -12,6 +12,14 @@ import { ProjectItem } from '../features/projects/ProjectCard';
 import { ClipperLogo } from './ClipperLogo';
 import { Surface, MotionButton, Badge } from './ui';
 import {
+  CinematicBrandReveal,
+  CinematicProductShowcase,
+  hasSeenBrandIntro,
+  hasSeenProductShowcase,
+  markBrandIntroSeen,
+  markOnboardingCompleted,
+} from '../features/onboarding';
+import {
   FolderOpen,
   LayoutTemplate,
   Film,
@@ -66,6 +74,23 @@ export const AppShell: React.FC<AppShellProps> = ({ onOpenArchitecture }) => {
   const [authModalMode, setAuthModalMode] = useState<AuthModalMode>('signin');
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
+
+  // Onboarding sequence state for unauthenticated first-time visitors
+  type OnboardingStep = 'brand_intro' | 'showcase' | 'none';
+
+  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(() => {
+    if (typeof window === 'undefined') return 'none';
+    if (!hasSeenBrandIntro()) return 'brand_intro';
+    if (!hasSeenProductShowcase()) return 'showcase';
+    return 'none';
+  });
+
+  // Authenticated users or users in an active password-recovery flow must never see onboarding
+  useEffect(() => {
+    if (user || isPasswordRecovery) {
+      setOnboardingStep('none');
+    }
+  }, [user, isPasswordRecovery]);
 
   // Backend Health state for diagnostics
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -123,9 +148,35 @@ export const AppShell: React.FC<AppShellProps> = ({ onOpenArchitecture }) => {
   }, []);
 
   // =========================================================================
-  // 1. UNAUTHENTICATED PUBLIC VISITOR EXPERIENCE (Part 1 & Part 6)
+  // 1. UNAUTHENTICATED PUBLIC VISITOR EXPERIENCE (Part 1, Part 6 & Phase 12B)
   // =========================================================================
   if (!user) {
+    // 1A. Cinematic Brand Reveal (First step for new visitors)
+    if (onboardingStep === 'brand_intro' && !isPasswordRecovery) {
+      return (
+        <CinematicBrandReveal
+          onComplete={() => {
+            markBrandIntroSeen();
+            setOnboardingStep('showcase');
+          }}
+        />
+      );
+    }
+
+    // 1B. Cinematic Product Showcase Tour (Second step for new visitors)
+    if (onboardingStep === 'showcase' && !isPasswordRecovery) {
+      return (
+        <CinematicProductShowcase
+          onComplete={() => {
+            markOnboardingCompleted();
+            setOnboardingStep('none');
+            setAuthModalMode('signin');
+            setIsAuthModalOpen(true);
+          }}
+        />
+      );
+    }
+
     return (
       <>
         <PublicLandingPage
@@ -133,7 +184,8 @@ export const AppShell: React.FC<AppShellProps> = ({ onOpenArchitecture }) => {
             setAuthModalMode(mode);
             setIsAuthModalOpen(true);
           }}
-          onOpenDiagnostics={() => setIsDiagnosticsOpen(true)}
+          onReplayIntro={() => setOnboardingStep('brand_intro')}
+          onReplayShowcase={() => setOnboardingStep('showcase')}
         />
 
         {/* Global Auth Modal */}
@@ -306,19 +358,11 @@ export const AppShell: React.FC<AppShellProps> = ({ onOpenArchitecture }) => {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[#C7C9CC]">Clipper Cinematic Studio</span>
             <span>·</span>
-            <span>PostgreSQL & Cloudflare R2 Connected</span>
+            <span>Studio Engine Active</span>
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsDiagnosticsOpen(true)}
-              className="text-[11px] text-[#777A7E] hover:text-[#C7C9CC] flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Open internal developer diagnostics (Ctrl+Shift+D)"
-            >
-              <Wrench className="w-3 h-3" />
-              <span>Developer Diagnostics</span>
-            </button>
-            <span>© {new Date().getFullYear()} Clipper Studio</span>
+            <span>© {new Date().getFullYear()} Clipper Studio. All rights reserved.</span>
           </div>
         </div>
       </footer>

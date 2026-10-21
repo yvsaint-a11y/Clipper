@@ -15,6 +15,7 @@ import { EditorInspector } from '../editor/components/EditorInspector';
 import { Timeline } from '../editor/components/Timeline';
 import { SaveAsTemplateModal } from '../templates/components/SaveAsTemplateModal';
 import { ReplaceSlotMediaModal } from './components/ReplaceSlotMediaModal';
+import { ExportModal } from '../editor/components/ExportModal';
 import { FeedbackBanner, EmptyState } from '@/src/components/ui';
 import { RefreshCw, Lock, AlertCircle, HardDrive, Settings, Layers } from 'lucide-react';
 
@@ -73,6 +74,7 @@ export const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ project: ini
   const [isLoadingPreviewUrl, setIsLoadingPreviewUrl] = useState(false);
   const [isSaveAsTemplateOpen, setIsSaveAsTemplateOpen] = useState(false);
   const [isReplaceSlotModalOpen, setIsReplaceSlotModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [activeSlotKeyForModal, setActiveSlotKeyForModal] = useState<string | null>(null);
   const [mobilePanelTab, setMobilePanelTab] = useState<'media' | 'inspector' | 'both'>('media');
 
@@ -602,6 +604,7 @@ export const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ project: ini
         }}
         replaceableSlotCount={replaceableSlots.length}
         onOpenReplaceSlotMedia={() => handleOpenReplaceSlot()}
+        onOpenExport={() => setIsExportModalOpen(true)}
       />
 
       {/* Global Error Banner if project failed to load */}
@@ -802,6 +805,18 @@ export const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ project: ini
             setProjectData(updatedProject);
             setProject(updatedProject, updatedTimeline);
           }}
+        />
+      )}
+
+      {/* 6. MODAL: Export Project (Render MP4) */}
+      {isExportModalOpen && (
+        <ExportModal
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          project={projectData}
+          timeline={timeline}
+          mediaAssets={projectMedia}
+          accessToken={accessToken}
         />
       )}
     </div>

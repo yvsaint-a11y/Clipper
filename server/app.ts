@@ -5,6 +5,7 @@ import { authRouter } from './routes/auth';
 import { mediaRouter } from './routes/media';
 import { projectsRouter } from './routes/projects';
 import { templatesRouter } from './routes/templates';
+import { rendersRouter } from './routes/renders';
 
 export function createExpressApp(): Express {
   const app = express();
@@ -18,6 +19,7 @@ export function createExpressApp(): Express {
   app.use('/api/db', databaseRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/media', mediaRouter);
+  app.use('/api', rendersRouter);
   app.use('/api/projects', projectsRouter);
   app.use('/api/templates', templatesRouter);
 

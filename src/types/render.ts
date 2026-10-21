@@ -12,14 +12,19 @@ export interface RenderSettings {
 
 export interface CanonicalRenderSpec {
   projectId: string;
-  projectVersion: number;
+  projectVersion?: number;
   timelineHash: string;
-  sourceAssetSignatures: Array<{
+  sourceAssetSignatures?: Array<{
     assetId: string;
     updatedAt: string;
   }>;
   renderSettings: RenderSettings;
   templateVersionId?: string | null;
+  // Output-affecting timeline snapshot properties
+  durationMs?: number;
+  aspectRatio?: string;
+  tracks?: any[];
+  transitions?: any[];
 }
 
 export interface RenderJob {

@@ -30,6 +30,7 @@ export interface EditorToolbarProps {
   onTitleChange?: (newTitle: string) => void;
   replaceableSlotCount?: number;
   onOpenReplaceSlotMedia?: () => void;
+  onOpenExport?: () => void;
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
@@ -47,6 +48,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   onTitleChange,
   replaceableSlotCount,
   onOpenReplaceSlotMedia,
+  onOpenExport,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [tempTitle, setTempTitle] = React.useState(projectName);
@@ -218,6 +220,20 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
           <span className="hidden xs:inline">{isSaving ? 'Saving...' : isDirty ? 'Save Project' : 'Saved'}</span>
           <span className="xs:hidden">{isSaving ? '...' : isDirty ? 'Save' : 'Saved'}</span>
         </MotionButton>
+
+        {onOpenExport && (
+          <MotionButton
+            variant="primary"
+            size="sm"
+            onClick={onOpenExport}
+            leftIcon={<Film className="w-3.5 h-3.5" />}
+            title="Export Video (MP4)"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 sm:px-3 shrink-0"
+          >
+            <span className="hidden xs:inline">Export</span>
+            <span className="xs:hidden">Export</span>
+          </MotionButton>
+        )}
       </div>
     </Surface>
   );

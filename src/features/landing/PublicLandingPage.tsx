@@ -12,7 +12,6 @@ import {
   Monitor,
   Smartphone,
   Square,
-  Wrench,
   Volume2,
   Type,
   Video,
@@ -20,12 +19,14 @@ import {
 
 interface PublicLandingPageProps {
   onOpenAuth: (mode: 'signin' | 'signup') => void;
-  onOpenDiagnostics?: () => void;
+  onReplayIntro?: () => void;
+  onReplayShowcase?: () => void;
 }
 
 export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   onOpenAuth,
-  onOpenDiagnostics,
+  onReplayIntro,
+  onReplayShowcase,
 }) => {
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -251,9 +252,9 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
               <div className="w-9 h-9 rounded-lg bg-[#1B1C1E] text-[#C7C9CC] flex items-center justify-center border border-[#3A3C3F]">
                 <Shield className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-semibold text-[#F2F2F0]">Zero-Egress Cloud Storage</h3>
+              <h3 className="text-sm font-semibold text-[#F2F2F0]">High-Speed Cloud Storage</h3>
               <p className="text-xs text-[#92969C] leading-relaxed">
-                Fast direct-to-cloud media uploads with Cloudflare R2 and persistent timeline versions stored in PostgreSQL.
+                Fast direct-to-cloud media uploads with streaming playback and encrypted, versioned timeline persistence.
               </p>
             </Surface>
           </div>
@@ -450,14 +451,22 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
           </div>
 
           <div className="flex items-center gap-4">
-            {onOpenDiagnostics && (
+            {onReplayShowcase && (
               <button
-                onClick={onOpenDiagnostics}
-                className="text-[11px] text-[#777A7E] hover:text-[#C7C9CC] flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Open developer and architecture diagnostics"
+                onClick={onReplayShowcase}
+                className="text-[11px] text-[#777A7E] hover:text-[#C7C9CC] transition-colors cursor-pointer"
+                title="Replay cinematic product showcase tour"
               >
-                <Wrench className="w-3 h-3" />
-                <span>Developer Diagnostics</span>
+                Product Tour
+              </button>
+            )}
+            {onReplayIntro && (
+              <button
+                onClick={onReplayIntro}
+                className="text-[11px] text-[#777A7E] hover:text-[#C7C9CC] transition-colors cursor-pointer"
+                title="Replay cinematic brand introduction"
+              >
+                Replay Brand Intro
               </button>
             )}
             <span>© {new Date().getFullYear()} Clipper Studio. All rights reserved.</span>

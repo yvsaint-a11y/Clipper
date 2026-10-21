@@ -292,7 +292,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMo
             <div className="flex items-center justify-between pb-3 border-b border-[#242b3d]">
               <Badge variant="outline" className="text-[11px] gap-1.5 border-[#2e374f] text-zinc-300 font-mono">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Supabase Auth Authority
+                Encrypted Studio Access
               </Badge>
               {onClose && (
                 <button
@@ -317,8 +317,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMo
               </h3>
               <p className="text-xs text-zinc-400 mt-1">
                 {signupVerificationSent && 'Check your email to verify your Clipper account.'}
-                {!signupVerificationSent && mode === 'signin' && 'Access your video timelines, R2 assets, and PostgreSQL project states.'}
-                {!signupVerificationSent && mode === 'signup' && 'Start editing with verified identity and zero-egress cloud storage.'}
+                {!signupVerificationSent && mode === 'signin' && 'Access your video timelines, media assets, and saved project states.'}
+                {!signupVerificationSent && mode === 'signup' && 'Start editing with verified identity and high-speed cloud storage.'}
                 {!signupVerificationSent && mode === 'forgot_password' && 'Enter your email address and we will send you a secure link to reset your password.'}
                 {!signupVerificationSent && mode === 'reset_password' && 'Enter a secure new password for your Clipper account.'}
               </p>
@@ -330,7 +330,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultMo
                 <FeedbackBanner
                   type="warning"
                   title="Client Configuration Warning"
-                  message="Supabase credentials (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY) are not detected."
+                  message="Authentication service is currently offline or unreachable. Please try again shortly."
                 />
               )}
               {formError && (
