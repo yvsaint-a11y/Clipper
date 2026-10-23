@@ -292,10 +292,15 @@ export function syncAndPruneTimelineTransitions(timeline: any): ClipTransition[]
     }
   }
 
-  for (const track of timeline.tracks) {
-    track.transitions = validTransitions.filter((t) => t.trackId === track.id);
+  // Only assign transitions properties if there are transitions or if properties already existed
+  if (validTransitions.length > 0 || timeline.transitions !== undefined) {
+    timeline.transitions = validTransitions;
   }
-  timeline.transitions = validTransitions;
+  for (const track of timeline.tracks) {
+    if (validTransitions.length > 0 || track.transitions !== undefined) {
+      track.transitions = validTransitions.filter((t) => t.trackId === track.id);
+    }
+  }
   return validTransitions;
 }
 

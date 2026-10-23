@@ -67,6 +67,7 @@ export const Timeline: React.FC<TimelineProps> = ({ timeline, durationMs, fps })
     trimClipEnd,
     splitClip,
     deleteClip,
+    initializeDefaultTracks,
   } = useEditorStore();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -331,6 +332,8 @@ export const Timeline: React.FC<TimelineProps> = ({ timeline, durationMs, fps })
         return <Type className="w-3.5 h-3.5 text-[#B4B6B9]" />;
       case 'caption':
         return <Subtitles className="w-3.5 h-3.5 text-[#92969C]" />;
+      case 'overlay':
+        return <Layers className="w-3.5 h-3.5 text-indigo-300" />;
       default:
         return <Layers className="w-3.5 h-3.5 text-zinc-400" />;
     }
@@ -662,6 +665,16 @@ export const Timeline: React.FC<TimelineProps> = ({ timeline, durationMs, fps })
                   <p className="text-[11px] text-zinc-500 max-w-sm mt-0.5 leading-relaxed">
                     This project does not contain any active tracks or clips yet.
                   </p>
+                  <button
+                    type="button"
+                    id="timeline-init-tracks-btn"
+                    data-testid="timeline-init-tracks-btn"
+                    onClick={initializeDefaultTracks}
+                    className="mt-3 px-3 py-1.5 rounded bg-[#1B1C1E] hover:bg-[#252628] border border-[#3A3C3F] hover:border-[#C7C9CC] text-xs font-medium text-white transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Initialize Tracks</span>
+                  </button>
                 </div>
               ) : (
                 /* RENDER REAL TRACKS & CLIPS */

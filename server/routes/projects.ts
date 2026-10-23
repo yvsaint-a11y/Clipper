@@ -8,6 +8,13 @@ import { eq, and, desc, sql, asc } from 'drizzle-orm';
 import crypto from 'crypto';
 import { replaceProjectSlotMedia, ProjectSlotError } from '../services/projectSlotService';
 
+export const DEFAULT_PROJECT_TRACKS = [
+  { index: 0, type: 'video', name: 'Main Video', isLocked: false, isMuted: false, volume: '1.00' },
+  { index: 1, type: 'overlay', name: 'Visual Overlay', isLocked: false, isMuted: false, volume: '1.00' },
+  { index: 2, type: 'text', name: 'Text Overlay', isLocked: false, isMuted: false, volume: '1.00' },
+  { index: 3, type: 'audio', name: 'Audio', isLocked: false, isMuted: false, volume: '1.00' },
+] as const;
+
 export const projectsRouter = Router();
 
 // Enforce authenticated Supabase JWT for all project operations
@@ -105,13 +112,41 @@ projectsRouter.post('/', async (req: AuthenticatedRequest, res: Response): Promi
       })
       .returning();
 
+    // Insert canonical default tracks for the timeline
+    const createdTracks = await db
+      .insert(tracks)
+      .values(
+        DEFAULT_PROJECT_TRACKS.map((t) => ({
+          timelineId: newTimeline.id,
+          index: t.index,
+          type: t.type,
+          name: t.name,
+          isLocked: t.isLocked,
+          isMuted: t.isMuted,
+          volume: t.volume,
+        }))
+      )
+      .returning();
+
+    const formattedTracks = createdTracks.map((track) => ({
+      id: track.id,
+      timelineId: track.timelineId,
+      name: track.name,
+      trackType: track.type as any,
+      orderIndex: track.index,
+      isMuted: track.isMuted,
+      isLocked: track.isLocked,
+      volume: Number(track.volume || 1),
+      clips: [],
+    }));
+
     // Create initial immutable snapshot (version 1)
     const initialSnapshot = {
       projectId: newProject.id,
       timelineId: newTimeline.id,
       fps: newProject.fps,
       durationMs: 0,
-      tracks: [],
+      tracks: formattedTracks,
       clips: [],
       createdAt: new Date().toISOString(),
     };
@@ -131,7 +166,14 @@ projectsRouter.post('/', async (req: AuthenticatedRequest, res: Response): Promi
 
     res.status(201).json({
       project: newProject,
-      timeline: newTimeline,
+      timeline: {
+        id: newTimeline.id,
+        projectId: newTimeline.projectId,
+        totalDurationMs: newTimeline.durationMs || 0,
+        fps: newTimeline.fps || newProject.fps,
+        tracks: formattedTracks,
+        updatedAt: newTimeline.updatedAt,
+      },
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to create project.';
@@ -166,17 +208,46 @@ projectsRouter.get('/:id', async (req: AuthenticatedRequest, res: Response): Pro
     }
 
     let timelineWithTracks: any = null;
-    const [timelineRecord] = await db
+    let [timelineRecord] = await db
       .select()
       .from(timelines)
       .where(eq(timelines.projectId, project.id));
 
+    if (!timelineRecord) {
+      [timelineRecord] = await db
+        .insert(timelines)
+        .values({
+          projectId: project.id,
+          durationMs: project.durationMs || 0,
+          fps: project.fps || 30,
+        })
+        .returning();
+    }
+
     if (timelineRecord) {
-      const dbTracks = await db
+      let dbTracks = await db
         .select()
         .from(tracks)
         .where(eq(tracks.timelineId, timelineRecord.id))
         .orderBy(asc(tracks.index));
+
+      // Self-healing: if an existing project has an empty timeline, seed the canonical 4 default tracks
+      if (dbTracks.length === 0) {
+        dbTracks = await db
+          .insert(tracks)
+          .values(
+            DEFAULT_PROJECT_TRACKS.map((t) => ({
+              timelineId: timelineRecord.id,
+              index: t.index,
+              type: t.type,
+              name: t.name,
+              isLocked: t.isLocked,
+              isMuted: t.isMuted,
+              volume: t.volume,
+            }))
+          )
+          .returning();
+      }
 
       const trackIds = dbTracks.map((t) => t.id);
       let dbClips: any[] = [];
@@ -365,11 +436,86 @@ projectsRouter.post('/:id/duplicate', async (req: AuthenticatedRequest, res: Res
       .returning();
 
     // Bootstrap duplicated timeline
-    await db.insert(timelines).values({
-      projectId: duplicated.id,
-      durationMs: sourceProject.durationMs,
-      fps: sourceProject.fps,
-    });
+    const [duplicatedTimeline] = await db
+      .insert(timelines)
+      .values({
+        projectId: duplicated.id,
+        durationMs: sourceProject.durationMs,
+        fps: sourceProject.fps,
+      })
+      .returning();
+
+    // Copy tracks from source timeline if available, otherwise seed defaults
+    const [sourceTimeline] = await db
+      .select()
+      .from(timelines)
+      .where(eq(timelines.projectId, sourceProject.id));
+
+    let sourceTracks: any[] = [];
+    if (sourceTimeline) {
+      sourceTracks = await db
+        .select()
+        .from(tracks)
+        .where(eq(tracks.timelineId, sourceTimeline.id))
+        .orderBy(asc(tracks.index));
+    }
+
+    if (sourceTracks.length > 0) {
+      for (const st of sourceTracks) {
+        const [clonedTrack] = await db
+          .insert(tracks)
+          .values({
+            timelineId: duplicatedTimeline.id,
+            index: st.index,
+            type: st.type,
+            name: st.name,
+            isLocked: st.isLocked,
+            isMuted: st.isMuted,
+            volume: st.volume,
+          })
+          .returning();
+
+        const sourceClips = await db
+          .select()
+          .from(clips)
+          .where(eq(clips.trackId, st.id));
+
+        for (const sc of sourceClips) {
+          await db.insert(clips).values({
+            trackId: clonedTrack.id,
+            mediaAssetId: sc.mediaAssetId,
+            type: sc.type,
+            name: sc.name,
+            startMs: sc.startMs,
+            endMs: sc.endMs,
+            trimStartMs: sc.trimStartMs,
+            trimEndMs: sc.trimEndMs,
+            speed: sc.speed,
+            transform: sc.transform,
+            crop: sc.crop,
+            audioProperties: sc.audioProperties,
+            textProperties: sc.textProperties,
+            captionProperties: sc.captionProperties,
+            transitions: sc.transitions,
+            effects: sc.effects,
+            animations: sc.animations,
+            slotBinding: sc.slotBinding,
+          });
+        }
+      }
+    } else {
+      await db.insert(tracks).values(
+        DEFAULT_PROJECT_TRACKS.map((t) => ({
+          timelineId: duplicatedTimeline.id,
+          index: t.index,
+          type: t.type,
+          name: t.name,
+          isLocked: t.isLocked,
+          isMuted: t.isMuted,
+          volume: t.volume,
+        }))
+      );
+    }
 
     res.status(201).json({ project: duplicated });
   } catch (err: unknown) {

@@ -68,6 +68,7 @@ export const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ project: ini
     splitClip,
     removeClip,
     togglePlayback,
+    initializeDefaultTracks,
   } = useEditorStore();
 
   const [activePreviewUrl, setActivePreviewUrl] = useState<string | null>(null);
@@ -432,8 +433,20 @@ export const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ project: ini
 
   // 5. Add Asset to Timeline Helper
   const handleAddAssetToTimeline = (asset: EditorMediaAsset) => {
-    if (!timeline?.tracks || timeline.tracks.length === 0) return;
-    const targetTrack = timeline.tracks.find((t) => t.trackType === 'video') || timeline.tracks[0];
+    let currentTimeline = timeline;
+    if (!currentTimeline?.tracks || currentTimeline.tracks.length === 0) {
+      initializeDefaultTracks();
+      currentTimeline = useEditorStore.getState().timeline;
+    }
+    if (!currentTimeline?.tracks || currentTimeline.tracks.length === 0) return;
+
+    const isAudio = asset.mimeType.startsWith('audio/');
+    const targetTrack = isAudio
+      ? (currentTimeline.tracks.find((t) => t.trackType === 'audio') || currentTimeline.tracks[0])
+      : (currentTimeline.tracks.find((t) => t.trackType === 'video') ||
+         currentTimeline.tracks.find((t) => t.trackType === 'overlay') ||
+         currentTimeline.tracks[0]);
+
     if (!targetTrack) return;
 
     // Calculate start time as furthest clip end time
@@ -448,7 +461,7 @@ export const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ project: ini
 
     addClipToTrack(targetTrack.id, {
       name: asset.originalFilename,
-      clipType: asset.mimeType.startsWith('video/') ? 'video' : (asset.mimeType.startsWith('audio/') ? 'audio' : 'image'),
+      clipType: isAudio ? 'audio' : (asset.mimeType.startsWith('video/') ? 'video' : 'image'),
       mediaAssetId: asset.id,
       startTimeMs: nextStartMs,
       endTimeMs: nextStartMs + durationMs,

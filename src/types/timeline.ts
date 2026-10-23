@@ -175,3 +175,24 @@ export interface Timeline {
   transitions?: ClipTransition[];
   updatedAt: string;
 }
+
+export const DEFAULT_TIMELINE_TRACK_DEFINITIONS = [
+  { index: 0, type: 'video' as TrackType, name: 'Main Video', isLocked: false, isMuted: false, volume: 1 },
+  { index: 1, type: 'overlay' as TrackType, name: 'Visual Overlay', isLocked: false, isMuted: false, volume: 1 },
+  { index: 2, type: 'text' as TrackType, name: 'Text Overlay', isLocked: false, isMuted: false, volume: 1 },
+  { index: 3, type: 'audio' as TrackType, name: 'Audio', isLocked: false, isMuted: false, volume: 1 },
+] as const;
+
+export function createDefaultTimelineTracks(timelineId: string = ''): TimelineTrack[] {
+  return DEFAULT_TIMELINE_TRACK_DEFINITIONS.map((def) => ({
+    id: `track-${timelineId || 'default'}-${def.type}-${def.index}`,
+    timelineId,
+    name: def.name,
+    trackType: def.type,
+    orderIndex: def.index,
+    isMuted: def.isMuted,
+    isLocked: def.isLocked,
+    volume: def.volume,
+    clips: [],
+  }));
+}

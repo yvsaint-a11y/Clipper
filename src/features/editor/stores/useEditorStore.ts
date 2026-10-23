@@ -35,7 +35,7 @@ import {
   applyAudioClipUpdates,
   resetAudioClipProperties,
 } from '../utils/audioClip';
-import type { BasicTransitionType, ClipTransition } from '@/src/types/timeline';
+import { type BasicTransitionType, type ClipTransition, createDefaultTimelineTracks } from '@/src/types/timeline';
 import {
   type ClipTransitionInput,
   type ClipTransitionUpdate,
@@ -174,6 +174,7 @@ export interface EditorState {
   selectClipAndTrack: (clipId: string | null, trackId: string | null) => void;
   toggleSnapping: () => void;
   setSnapThresholdMs: (thresholdMs: number) => void;
+  initializeDefaultTracks: () => void;
   resetEditor: () => void;
 }
 
@@ -219,7 +220,11 @@ export const useEditorStore = create<EditorState>()(
     setProject: (project, timeline = null) => {
       set((state) => {
         state.currentProject = project ? JSON.parse(JSON.stringify(project)) : null;
-        state.timeline = timeline ? JSON.parse(JSON.stringify(timeline)) : null;
+        let effectiveTimeline = timeline ? JSON.parse(JSON.stringify(timeline)) : null;
+        if (effectiveTimeline && !Array.isArray(effectiveTimeline.tracks)) {
+          effectiveTimeline.tracks = createDefaultTimelineTracks(effectiveTimeline.id);
+        }
+        state.timeline = effectiveTimeline;
         if (state.timeline) {
           syncAndPruneTimelineTransitions(state.timeline);
         }
@@ -234,6 +239,24 @@ export const useEditorStore = create<EditorState>()(
         state.selectedTrackId = null;
         state.selectedTransitionId = null;
         state.savedSnapshotString = calculateCurrentSnapshotString(state);
+      });
+    },
+
+    initializeDefaultTracks: () => {
+      set((state) => {
+        if (!state.timeline) {
+          state.timeline = {
+            id: `timeline-${state.currentProject?.id || 'default'}`,
+            projectId: state.currentProject?.id || '',
+            totalDurationMs: state.currentProject?.durationMs || 0,
+            tracks: createDefaultTimelineTracks(state.currentProject?.id || 'default'),
+            updatedAt: new Date().toISOString(),
+          };
+        } else if (!state.timeline.tracks || state.timeline.tracks.length === 0) {
+          state.timeline.tracks = createDefaultTimelineTracks(state.timeline.id);
+        }
+        const currentStr = calculateCurrentSnapshotString(state);
+        state.isDirty = currentStr !== state.savedSnapshotString;
       });
     },
 
@@ -428,9 +451,9 @@ export const useEditorStore = create<EditorState>()(
             : undefined;
 
         if (!targetTrack) {
-          targetTrack = tracks.find(
-            (t) => (t.trackType === 'text' || t.trackType === 'overlay') && !t.isLocked,
-          );
+          targetTrack =
+            tracks.find((t) => t.trackType === 'text' && !t.isLocked) ||
+            tracks.find((t) => t.trackType === 'overlay' && !t.isLocked);
         }
         if (!targetTrack && state.selectedTrackId) {
           const selected = tracks.find((t) => t.id === state.selectedTrackId);
